@@ -10,7 +10,8 @@ function validateRequest(request) {
                 prcid: Joi.string().required(),
                 aptkn: Joi.string().allow(null).allow(''),
                 rjtkn: Joi.string().allow(null).allow(''),
-                rvtkn: Joi.string().allow(null).allow('')
+                rvtkn: Joi.string().allow(null).allow(''),
+                syscd: Joi.string().allow(null).allow(''),
             });
            
     
