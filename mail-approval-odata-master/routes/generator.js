@@ -9,13 +9,15 @@ const generateToken = function (oReq) {
     let oConvReq = _.cloneDeep(oReq);
     let oData = {
         uname: oConvReq.uname,
-        actio: null
+        actio: null,
+        prcid: oConvReq.prcid
     };
     if (oConvReq.hasOwnProperty("mapid")) {
         oData.mapid = oConvReq.mapid;
     } else if (oConvReq.hasOwnProperty("docid")) {
         oData.docid = oConvReq.docid;
         oData.appno = oConvReq.appno;
+        oData.prcid = oConvReq.prcid;
     }
 
 
@@ -42,7 +44,7 @@ router.get("/", async (req, res) => {
 
 router.post("/", async (req, res) => {
     const { error } = validateRequest(req.body);
-    //console.log( req.body );
+    console.log( req.body );
 
     if (error) {
         return res.status(400).send(error.details[0].message);
@@ -50,15 +52,9 @@ router.post("/", async (req, res) => {
 
     try {
         let oResponse = null;
-        if (req.body.hasOwnProperty("docid")) {
-            oResponse = generateToken(req.body);
-        } else {
-            oResponse = [];
-            req.body.forEach(function (oReqLine) {
-                let oToken = generateToken(oReqLine);
-                oResponse.push(oToken);
-            });
-        }
+        
+        oResponse = generateToken(req.body);
+       
 
         res.setHeader('Content-Type', 'application/json');
         res.status(200).end(JSON.stringify(oResponse));

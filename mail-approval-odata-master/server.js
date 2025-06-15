@@ -13,10 +13,6 @@ if (!process.env.JWT_PRIVATE_KEY) {
      process.exit(1);
 }
 
-if (process.env.NODE_ENV !== "production") {
-  require("dotenv").config();
-}
-
 //Create express app
 const app = express();
 
