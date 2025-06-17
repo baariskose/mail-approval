@@ -1,7 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const jwt = require("jsonwebtoken");
-
+const axios = require('axios');
+const js2xmlparser = require("js2xmlparser");
 router.get('/', async (req, res) => {
     return res.status(405).send('GET not allowed');
 });
@@ -20,95 +21,134 @@ router.get('/:processToken', async (req, res) => {
         } else {
             let sServiceUrl = process.env.SAP_BASE_URL + process.env.SAP_SERVICE_URL;
 
+
             const CONNECTION = {
                 url: sServiceUrl,
                 user: process.env.SAP_USERNAME,
                 password: process.env.SAP_PASSWORD
             };
+            let xml = `<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
+                  xmlns:urn="urn:sap-com:document:sap:rfc:functions">
+                <soapenv:Header/>
+                    <soapenv:Body>
+                        <urn:Z_WF_MOBILE_APP_MANAGE>
+                            <IV_ACTIO>${decoded.actio}</IV_ACTIO>
+                            <IV_APPNO>${decoded.appno}</IV_APPNO>
+                            <IV_DOCID>${decoded.docid}</IV_DOCID>
+                            <IV_PRCID>${decoded.prcid}</IV_PRCID>
+                            <IV_UNAME>${decoded.uname}</IV_UNAME>
+                        </urn:Z_WF_MOBILE_APP_MANAGE>
+                    </soapenv:Body>
+                </soapenv:Envelope>`
 
-            require("node-ui5").then(({ sap }) => {
-                sap.ui.require([
-                    'sap/ui/model/odata/v2/ODataModel',
-                    'node-ui5/authenticate/basic-with-csrf',
-                    'node-ui5/promisify',
-                ], async function (ODataModel, authenticate) {
-                    let sError = false;
+            
+            const token = Buffer.from(`${CONNECTION.user}:${CONNECTION.password}`).toString('base64');
+            let config = {
+                method: 'get',
+                maxBodyLength: Infinity,
+                url: sServiceUrl,
+                headers: {
+                    'Content-Type': 'text/xml',
+                    'Authorization': `Basic ${token}`,
+                    //'Cookie': 'sap-usercontext=sap-client=500'
+                },
+                data: xml
+            };
 
-                    let oConn = await authenticate(CONNECTION).catch(() => {
-                        sError = true;
-                        return res.status(400).send("<div style='color: #721c24; background-color: #f8d7da; position: relative; padding: .75rem 1.25rem; border: 1px solid #f5c6cb; border-radius: .25rem;'>Onay sistemine bağlantı başarısız!</div>");
-                    });
-
-                    if (oConn && !sError) {
-                        const oModel = new ODataModel(oConn);
-
-                        await oModel.metadataLoaded();
-
-                        let sPath, oApproval;
-
-                        if (decoded.hasOwnProperty("docid")) {
-                            sPath = oModel.createKey("/ProcessApprovalSet", {
-                                "Docid": decoded.docid,
-                                "Appno": decoded.appno,
-                                "Uname": decoded.uname
-                            });
-
-                            oApproval = {
-                                "Docid": decoded.docid,
-                                "Appno": decoded.appno,
-                                "Uname": decoded.uname,
-                                "Actio": decoded.actio,
-                                "Stpnt": ""
-                            };
-                        } else if (decoded.hasOwnProperty("mapid")) {
-                            sPath = oModel.createKey("/ProcessMassApprovalSet", {
-                                "Mapid": decoded.mapid,
-                                "Uname": decoded.uname
-                            });
-
-                            oApproval = {
-                                "Mapid": decoded.mapid,
-                                "Uname": decoded.uname,
-                                "Actio": decoded.actio,
-                                "Stpnt": ""
-                            };
-                        }
-
-                        oModel.update(sPath, oApproval, {
-                            success: function (oData, oResponse) {
-                                try {
-                                    let oHeader = JSON.parse(oResponse.headers["sap-process-return"]);
-                                    oHeader.Message = decodeURI(oHeader.Message);
-                                    if (oHeader.Type === "E") {
-                                        return res.status(400).send(oApproval.Actio === "APPROVE" ?
-                                            "Onay işlemi sırasında hata oluştu:<br>" + oHeader.Message :
-                                            "Reddetme işlemi sırasında hata oluştu:<br>" + oHeader.Message)
-                                    } else {
-
-                                        return res.status(200).send(oApproval.Actio === "APPROVE" ?
-                                            "Talep başarıyla onaylandı" :
-                                            "Talep başarıyla reddedildi");
-                                    }
-
-                                } catch (oEx) {
-                                    return res.status(400).send(oApproval.Actio === "APPROVE" ?
-                                        "Onay işlemi sırasında beklenmeyen hata oluştu" :
-                                        "Reddetme işlemi sırasında beklenmeyen hata oluştu"
-                                    );
-
-                                }
-                            },
-                            error: function (oError) {
-                                return res.status(400).send("Onay/ret sırasında hata oluştu:<br> " + oError.responseText);
-
-                            }
-                        });
-                    } else {
-                        return res.status(400).send("<div style='color: #721c24; background-color: #f8d7da; position: relative; padding: .75rem 1.25rem; border: 1px solid #f5c6cb; border-radius: .25rem;'>Onay sistemine bağlantı başarısız!</div>");
-                    }
-
+            axios.request(config)
+                .then((response) => {
+                    console.log(JSON.stringify(response.data));
                 })
-            });
+                .catch((error) => {
+                    console.log(error);
+                    return res.status(400).send("<div style='color: #721c24; background-color: #f8d7da; position: relative; padding: .75rem 1.25rem; border: 1px solid #f5c6cb; border-radius: .25rem;'>Onay aşamasında bağlantı başarısız!</div>");
+                });
+
+
+            // require("node-ui5").then(({ sap }) => {
+            //     sap.ui.require([
+            //         'sap/ui/model/odata/v2/ODataModel',
+            //         'node-ui5/authenticate/basic-with-csrf',
+            //         'node-ui5/promisify',
+            //     ], async function (ODataModel, authenticate) {
+            //         let sError = false;
+
+            //         let oConn = await authenticate(CONNECTION).catch(() => {
+            //             sError = true;
+            //             return res.status(400).send("<div style='color: #721c24; background-color: #f8d7da; position: relative; padding: .75rem 1.25rem; border: 1px solid #f5c6cb; border-radius: .25rem;'>Onay sistemine bağlantı başarısız!</div>");
+            //         });
+
+            //         if (oConn && !sError) {
+            //             const oModel = new ODataModel(oConn);
+
+            //             await oModel.metadataLoaded();
+
+            //             let sPath, oApproval;
+
+            //             if (decoded.hasOwnProperty("docid")) {
+            //                 sPath = oModel.createKey("/ProcessApprovalSet", {
+            //                     "Docid": decoded.docid,
+            //                     "Appno": decoded.appno,
+            //                     "Uname": decoded.uname
+            //                 });
+
+            //                 oApproval = {
+            //                     "Docid": decoded.docid,
+            //                     "Appno": decoded.appno,
+            //                     "Uname": decoded.uname,
+            //                     "Actio": decoded.actio,
+            //                     "Stpnt": ""
+            //                 };
+            //             } else if (decoded.hasOwnProperty("mapid")) {
+            //                 sPath = oModel.createKey("/ProcessMassApprovalSet", {
+            //                     "Mapid": decoded.mapid,
+            //                     "Uname": decoded.uname
+            //                 });
+
+            //                 oApproval = {
+            //                     "Mapid": decoded.mapid,
+            //                     "Uname": decoded.uname,
+            //                     "Actio": decoded.actio,
+            //                     "Stpnt": ""
+            //                 };
+            //             }
+
+            //             oModel.update(sPath, oApproval, {
+            //                 success: function (oData, oResponse) {
+            //                     try {
+            //                         let oHeader = JSON.parse(oResponse.headers["sap-process-return"]);
+            //                         oHeader.Message = decodeURI(oHeader.Message);
+            //                         if (oHeader.Type === "E") {
+            //                             return res.status(400).send(oApproval.Actio === "APPROVE" ?
+            //                                 "Onay işlemi sırasında hata oluştu:<br>" + oHeader.Message :
+            //                                 "Reddetme işlemi sırasında hata oluştu:<br>" + oHeader.Message)
+            //                         } else {
+
+            //                             return res.status(200).send(oApproval.Actio === "APPROVE" ?
+            //                                 "Talep başarıyla onaylandı" :
+            //                                 "Talep başarıyla reddedildi");
+            //                         }
+
+            //                     } catch (oEx) {
+            //                         return res.status(400).send(oApproval.Actio === "APPROVE" ?
+            //                             "Onay işlemi sırasında beklenmeyen hata oluştu" :
+            //                             "Reddetme işlemi sırasında beklenmeyen hata oluştu"
+            //                         );
+
+            //                     }
+            //                 },
+            //                 error: function (oError) {
+            //                     return res.status(400).send("Onay/ret sırasında hata oluştu:<br> " + oError.responseText);
+
+            //                 }
+            //             });
+            //         } else {
+            //             return res.status(400).send("<div style='color: #721c24; background-color: #f8d7da; position: relative; padding: .75rem 1.25rem; border: 1px solid #f5c6cb; border-radius: .25rem;'>Onay sistemine bağlantı başarısız!</div>");
+            //         }
+
+            //     })
+            // });
+
         }
     });
 
