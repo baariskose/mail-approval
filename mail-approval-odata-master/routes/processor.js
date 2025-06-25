@@ -2,14 +2,16 @@ const express = require('express');
 const router = express.Router();
 const jwt = require("jsonwebtoken");
 const axios = require('axios');
-const js2xmlparser = require("js2xmlparser");
+const xml2js = require('xml2js');
+const { replace } = require('lodash');
+
 router.get('/', async (req, res) => {
     return res.status(405).send('GET not allowed');
 });
 
 router.get('/:processToken', async (req, res) => {
     let sToken = req.params.processToken;
-
+    const parser = new xml2js.Parser();
     if (!sToken) {
         //return res.status(400).send('Invalid token');
         res.status(400).send("Geçersiz işlem numarası");
@@ -41,7 +43,7 @@ router.get('/:processToken', async (req, res) => {
                     </soapenv:Body>
                 </soapenv:Envelope>`
 
-            
+
             const token = Buffer.from(`${CONNECTION.user}:${CONNECTION.password}`).toString('base64');
             let config = {
                 method: 'get',
@@ -57,7 +59,28 @@ router.get('/:processToken', async (req, res) => {
 
             axios.request(config)
                 .then((response) => {
+                
                     console.log(JSON.stringify(response.data));
+                    let responseLast = "";
+                    parser.parseString(response.data, (err, result) => {
+                        if (err) {
+                            console.error("Hata:", err);
+                        } else {
+                            const envelope = result['soap-env:Envelope'];
+                            const body = envelope['soap-env:Body'];
+                            const data = body[0];
+                            const data2 = data['n0:Z_WF_MOBILE_APP_MANAGEResponse'];
+                            const data3 = data2[0];
+                            const data4 = data3["ET_RETURN2"];
+                            responseLast  = data4[0].item[0]; 
+                            console.log("JSON:", data4[0].item);
+
+                        }
+                    });
+                    return res.status(200).send(responseLast);//.send(oApproval.Actio === "APPROVE" ?
+                    //                        "Talep başarıyla onaylandı" :
+                    //                        "Talep başarıyla reddedildi");
+
                 })
                 .catch((error) => {
                     console.log(error);

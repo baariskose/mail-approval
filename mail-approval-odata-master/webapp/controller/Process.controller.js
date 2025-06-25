@@ -76,13 +76,26 @@ sap.ui.define([
                 url: "./api/processor/" + sToken
             }).done(function (data, textStatus, jqxhr) {
                 that.closeBusyFragment();
-                oAppModel.setProperty("/message", {
+                console.log("asdada"+ data.type);
+                if (data.TYPE[0] === 'E'){
+                     oAppModel.setProperty("/message", {
+                    "type": "Error",
+                    "icon": "sap-icon://error",
+                     "text": that.getText("ERROR_OCCURRED"),
+                    "description": data.MESSAGE_V1[0],
+                    "visible": true
+                });
+                }
+                else {
+                     oAppModel.setProperty("/message", {
                     "type": "Success",
                     "icon": "sap-icon://message-success",
                     "text": that.getText("OPERATION_SUCCESSFUL"),
-                    "description": jqxhr.responseText,
+                    "description": 'İşlem başarılı',
                     "visible": true
                 });
+                }
+               
             }).error(function (jqxhr, textStatus, errorThrown) {
                 that.closeBusyFragment();
                 oAppModel.setProperty("/message", {

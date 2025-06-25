@@ -14,8 +14,8 @@
         </customData>
 		<buttons>
 			<Button text="{i18n>CLOSE_PAGE}" press=".onClosePage" type="Reject" icon="sap-icon://decline"/>
-			<Button text="{i18n>GO_TO_IKONLINE}" press=".onOpenFiori" type="Emphasized"
-			icon="sap-icon://home"/>
+			<!-- <Button text="{i18n>GO_TO_IKONLINE}" press=".onOpenFiori" type="Emphasized"
+			icon="sap-icon://home"/> -->
 		</buttons>
 	</MessagePage>
 </mvc:View>
