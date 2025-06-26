@@ -52,6 +52,7 @@ router.get('/:processToken', async (req, res) => {
                 headers: {
                     'Content-Type': 'text/xml',
                     'Authorization': `Basic ${token}`,
+                    'Host': 'onay.kizilayteknoloji.com.tr',
                     //'Cookie': 'sap-usercontext=sap-client=500'
                 },
                 data: xml
