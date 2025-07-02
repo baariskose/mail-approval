@@ -17,18 +17,24 @@ router.get('/:processToken', async (req, res) => {
         res.status(400).send("Geçersiz işlem numarası");
     }
 
+    console.log("Token:" + sToken);
+
     jwt.verify(sToken, process.env.JWT_PRIVATE_KEY, function (err, decoded) {
         if (err) {
             return res.status(400).send("Geçersiz işlem numarası");
         } else {
             let sServiceUrl = process.env.SAP_BASE_URL + process.env.SAP_SERVICE_URL;
 
+            console.log("Service URL:" + sServiceUrl);
 
             const CONNECTION = {
                 url: sServiceUrl,
                 user: process.env.SAP_USERNAME,
                 password: process.env.SAP_PASSWORD
             };
+
+            console.log("Process auth:" +  process.env.SAP_USERNAME + "@" +  process.env.SAP_PASSWORD);
+            console.log("Decoded token:", ...decoded);
             let xml = `<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
                   xmlns:urn="urn:sap-com:document:sap:rfc:functions">
                 <soapenv:Header/>
@@ -52,7 +58,7 @@ router.get('/:processToken', async (req, res) => {
                 headers: {
                     'Content-Type': 'text/xml',
                     'Authorization': `Basic ${token}`,
-                    'Host': 'onay.kizilayteknoloji.com.tr',
+                    //'Host': 'onay.kizilayteknoloji.com.tr',
                     //'Cookie': 'sap-usercontext=sap-client=500'
                 },
                 data: xml
@@ -84,7 +90,7 @@ router.get('/:processToken', async (req, res) => {
 
                 })
                 .catch((error) => {
-                    console.log(error);
+                    console.log("Error:",error);
                     return res.status(400).send("<div style='color: #721c24; background-color: #f8d7da; position: relative; padding: .75rem 1.25rem; border: 1px solid #f5c6cb; border-radius: .25rem;'>Onay aşamasında bağlantı başarısız!</div>");
                 });
 
