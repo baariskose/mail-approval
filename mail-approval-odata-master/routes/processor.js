@@ -34,7 +34,7 @@ router.get('/:processToken', async (req, res) => {
             };
 
             console.log("Process auth:" +  process.env.SAP_USERNAME + "@" +  process.env.SAP_PASSWORD);
-            console.log("Decoded token:", ...decoded);
+            console.log("Decoded token:", JSON.stringify(decoded));
             let xml = `<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
                   xmlns:urn="urn:sap-com:document:sap:rfc:functions">
                 <soapenv:Header/>
