@@ -10,7 +10,8 @@ const generateToken = function (oReq) {
     let oData = {
         uname: oConvReq.uname,
         actio: null,
-        prcid: oConvReq.prcid
+        prcid: oConvReq.prcid,
+        sysid: oConvReq.sysid
     };
     if (oConvReq.hasOwnProperty("mapid")) {
         oData.mapid = oConvReq.mapid;
@@ -18,6 +19,7 @@ const generateToken = function (oReq) {
         oData.docid = oConvReq.docid;
         oData.appno = oConvReq.appno;
         oData.prcid = oConvReq.prcid;
+        oData.sysid = oConvReq.sysid;
     }
 
 

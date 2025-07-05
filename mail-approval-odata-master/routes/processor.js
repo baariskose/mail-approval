@@ -26,7 +26,7 @@ router.get('/:processToken', async (req, res) => {
             let sServiceUrl = process.env.SAP_BASE_URL + process.env.SAP_SERVICE_URL;
 
             console.log("Service URL:" + sServiceUrl);
-
+            console.log("Token decode edildi")
             const CONNECTION = {
                 url: sServiceUrl,
                 user: process.env.SAP_USERNAME,
@@ -44,6 +44,7 @@ router.get('/:processToken', async (req, res) => {
                             <IV_APPNO>${decoded.appno}</IV_APPNO>
                             <IV_DOCID>${decoded.docid}</IV_DOCID>
                             <IV_PRCID>${decoded.prcid}</IV_PRCID>
+                            <IV_SYSID>${decoded.sysid}</IV_PRCID>
                             <IV_UNAME>${decoded.uname}</IV_UNAME>
                         </urn:Z_WF_MOBILE_APP_MANAGE>
                     </soapenv:Body>
@@ -66,7 +67,7 @@ router.get('/:processToken', async (req, res) => {
 
             axios.request(config)
                 .then((response) => {
-                
+                     console.log("SAPDEN istek başarılı döndü")
                     console.log(JSON.stringify(response.data));
                     let responseLast = "";
                     parser.parseString(response.data, (err, result) => {
@@ -90,6 +91,7 @@ router.get('/:processToken', async (req, res) => {
 
                 })
                 .catch((error) => {
+                     console.log("SAP Den cevap hatalı geldi")
                     console.log("Error:",error);
                     return res.status(400).send("<div style='color: #721c24; background-color: #f8d7da; position: relative; padding: .75rem 1.25rem; border: 1px solid #f5c6cb; border-radius: .25rem;'>Onay aşamasında bağlantı başarısız!</div>");
                 });

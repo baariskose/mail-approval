@@ -22,7 +22,7 @@ sap.ui.define([
             var sToken = $.sap.getUriParameters().get("token");
             var oAppModel = this.getModel("appModel");
             var that = this;
-
+            console.log("onProcessMatched giriş")
             oAppModel.setProperty("/token", sToken);
             oAppModel.setProperty("/message", {
                 "visible": false
@@ -33,9 +33,11 @@ sap.ui.define([
             $.ajax({
                 url: "./api/validator/" + sToken
             }).done(function (encodedToken, textStatus, jqxhr) {
+                console.log("validator bitti")
                 that.closeBusyFragment();
                 that._handleProcessEvent(sToken, encodedToken);
             }).error(function (jqxhr, textStatus, errorThrown) {
+                console.log("validator hatası")
                 that.closeBusyFragment();
                 oAppModel.setProperty("/message", {
                     "type": "Error",
@@ -76,7 +78,7 @@ sap.ui.define([
                 url: "./api/processor/" + sToken
             }).done(function (data, textStatus, jqxhr) {
                 that.closeBusyFragment();
-                console.log("asdada"+ data.type);
+                console.log("api/processor başarılı döndü")
                 if (data.TYPE[0] === 'E'){
                      oAppModel.setProperty("/message", {
                     "type": "Error",

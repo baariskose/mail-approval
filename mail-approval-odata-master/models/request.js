@@ -8,6 +8,7 @@ function validateRequest(request) {
                 appno: Joi.string().required(),
                 uname: Joi.string().max(12).required(),
                 prcid: Joi.string().required(),
+                sysid: Joi.string().required(),
                 aptkn: Joi.string().allow(null).allow(''),
                 rjtkn: Joi.string().allow(null).allow(''),
                 rvtkn: Joi.string().allow(null).allow(''),
