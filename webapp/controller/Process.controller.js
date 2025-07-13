@@ -7,7 +7,52 @@ sap.ui.define([
     return Controller.extend("workflow.approvals.com.kizilay.controller.HelloPanel", {
 
         onInit: function () {
-            this.getRouter().getRoute("process").attachPatternMatched(this._onProcessMatched, this);
+            //this.getRouter().getRoute("process").attachPatternMatched(this._onProcessMatched, this);
+            console.log("Process Controller onInit called");
+            
+            // Ensure router is available before attaching events
+            var oRouter = this.getRouter();
+            
+            if (oRouter) {
+                var oRoute = oRouter.getRoute("process");
+                
+                if (oRoute) {
+                    console.log("Attaching pattern matched event to process route");
+                    oRoute.attachPatternMatched(this._onProcessMatched, this);
+                } else {
+                    console.error("Process route not found in router");
+                    // Try to attach after a delay
+                    setTimeout(function() {
+                        var oDelayedRoute = oRouter.getRoute("process");
+                        if (oDelayedRoute) {
+                            console.log("Delayed attachment of pattern matched event");
+                            oDelayedRoute.attachPatternMatched(this._onProcessMatched, this);
+                        }
+                    }.bind(this), 500);
+                }
+            } else {
+                console.error("Router not available in controller");
+                // Try to get router after a delay
+                setTimeout(function() {
+                    this._attachRouteEvents();
+                }.bind(this), 1000);
+            }
+        },
+        _attachRouteEvents: function() {
+            console.log("Attempting to attach route events...");
+            var oRouter = this.getRouter();
+            
+            if (oRouter) {
+                var oRoute = oRouter.getRoute("process");
+                if (oRoute) {
+                    console.log("Successfully attached route events");
+                    oRoute.attachPatternMatched(this._onProcessMatched, this);
+                } else {
+                    console.error("Still no process route found");
+                }
+            } else {
+                console.error("Still no router available");
+            }
         },
         onRefreshPage: function (oEvent) {
             window.location.reload();
