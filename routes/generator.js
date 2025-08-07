@@ -18,6 +18,7 @@ const generateToken = function (oReq) {
     } else if (oConvReq.hasOwnProperty("docid")) {
         oData.docid = oConvReq.docid;
         oData.appno = oConvReq.appno;
+        oData.appno2 = oConvReq.appno2;
         oData.prcid = oConvReq.prcid;
         oData.sysid = oConvReq.sysid;
     }

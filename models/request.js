@@ -5,7 +5,7 @@ function validateRequest(request) {
     try{
             const schemaSingleApprovalObj = Joi.object({
                 docid: Joi.string().required(),
-                appno: Joi.string().required(),
+                appno: Joi.string().allow(null).allow(''), // MM mail onay süreci için null izin verildi char değer gelebilir
                 uname: Joi.string().max(12).required(),
                 prcid: Joi.string().required(),
                 sysid: Joi.string().required(),
@@ -13,6 +13,7 @@ function validateRequest(request) {
                 rjtkn: Joi.string().allow(null).allow(''),
                 rvtkn: Joi.string().allow(null).allow(''),
                 syscd: Joi.string().allow(null).allow(''),
+                appno2: Joi.string().allow(null).allow(''),
             });
            
     

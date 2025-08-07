@@ -53,6 +53,7 @@ router.get('/:processToken', async (req, res) => {
                             <IV_PRCID>${decoded.prcid}</IV_PRCID>
                             <IV_SYSID>${decoded.sysid}</IV_SYSID>
                             <IV_UNAME>${decoded.uname}</IV_UNAME>
+                            <IV_APPNO>${decoded.appno2}</IV_APPNO>
                         </urn:Z_WF_MOBILE_APP_MANAGE>
                     </soapenv:Body>
                 </soapenv:Envelope>`
