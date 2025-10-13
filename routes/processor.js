@@ -58,7 +58,7 @@ router.get('/:processToken', async (req, res) => {
             //             </urn:Z_WF_MOBILE_APP_MANAGE>
             //         </soapenv:Body>
             //     </soapenv:Envelope>`
-            
+
             const token = Buffer.from(`${CONNECTION.user}:${CONNECTION.password}`).toString('base64');
             let config = {
                 //method: 'get',
@@ -73,14 +73,14 @@ router.get('/:processToken', async (req, res) => {
                     //'Cookie': 'sap-usercontext=sap-client=500'
                 },
                 data: JSON.stringify({
-                IV_ACTIO: decoded.actio,
-                IV_APPNO: decoded.appno,
-                IV_DOCID: decoded.docid,
-                IV_PRCID: decoded.prcid,
-                IV_SYSID: decoded.sysid,
-                IV_UNAME: decoded.uname,
-                IV_APPNO2: decoded.appno2
-            })
+                    IV_ACTIO: decoded.actio,
+                    IV_APPNO: decoded.appno,
+                    IV_DOCID: decoded.docid,
+                    IV_PRCID: decoded.prcid,
+                    IV_SYSID: decoded.sysid,
+                    IV_UNAME: decoded.uname,
+                    IV_APPNO2: decoded.appno2
+                })
 
             };
 
@@ -88,23 +88,35 @@ router.get('/:processToken', async (req, res) => {
                 .then((response) => {
                     console.log("SAPDEN istek başarılı döndü")
                     console.log(JSON.stringify(response.data));
-                    let responseLast = "";
-                    parser.parseString(response.data, (err, result) => {
-                        if (err) {
-                            console.error("Hata:", err);
-                        } else {
-                            // const envelope = result['soap-env:Envelope'];
-                            // const body = envelope['soap-env:Body'];
-                            // const data = body[0];
-                            // const data2 = data['n0:Z_WF_MOBILE_APP_MANAGEResponse'];
-                            // const data3 = data2[0];
-                            // const data4 = data3["ET_RETURN2"];
-                            // responseLast = data4[0].item[0];
-                            responseLast = response.data;
-                            console.log("JSON:", responseLast);
+                    const item = response.data.ET_RETURN2?.item;
+                    // parser.parseString(response.data, (err, result) => {
+                    //     if (err) {
+                    //         console.error("Hata:", err);
+                    //     } else {
+                    //         // const envelope = result['soap-env:Envelope'];
+                    //         // const body = envelope['soap-env:Body'];
+                    //         // const data = body[0];
+                    //         // const data2 = data['n0:Z_WF_MOBILE_APP_MANAGEResponse'];
+                    //         // const data3 = data2[0];
+                    //         // const data4 = data3["ET_RETURN2"];
+                    //         // responseLast = data4[0].item[0];
+                    //         responseLast = response.data;
+                    //         console.log("JSON:", responseLast);
 
-                        }
-                    });
+                    //     }
+                    // });
+                    if (!item) {
+                        console.error("ET_RETURN2 veya item bulunamadı");
+                        return res.status(400).send({
+                            success: false,
+                            message: "Yanıt formatı hatalı"
+                        });
+                    }
+
+                    console.log("Response Item:", item);
+
+                    // Frontend'e JSON olarak gönder
+                    return res.status(200).send(item);
                     return res.status(200).send(responseLast);//.send(oApproval.Actio === "APPROVE" ?
                     //                        "Talep başarıyla onaylandı" :
                     //                        "Talep başarıyla reddedildi");

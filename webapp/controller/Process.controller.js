@@ -124,12 +124,15 @@ sap.ui.define([
             }).done(function (data, textStatus, jqxhr) {
                 that.closeBusyFragment();
                 console.log("api/processor başarılı döndü")
-                if (data.TYPE[0] === 'E'){
+                //if (data.TYPE[0] === 'E')
+                if (data.TYPE === 'E')
+                    {
                      oAppModel.setProperty("/message", {
                     "type": "Error",
                     "icon": "sap-icon://error",
                      "text": that.getText("ERROR_OCCURRED"),
-                    "description": data.MESSAGE_V1[0],
+                    //"description": data.MESSAGE_V1[0],
+                     "description": data.MESSAGE_V1, 
                     "visible": true
                 });
                 }
