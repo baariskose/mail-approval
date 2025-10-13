@@ -93,14 +93,15 @@ router.get('/:processToken', async (req, res) => {
                         if (err) {
                             console.error("Hata:", err);
                         } else {
-                            const envelope = result['soap-env:Envelope'];
-                            const body = envelope['soap-env:Body'];
-                            const data = body[0];
-                            const data2 = data['n0:Z_WF_MOBILE_APP_MANAGEResponse'];
-                            const data3 = data2[0];
-                            const data4 = data3["ET_RETURN2"];
-                            responseLast = data4[0].item[0];
-                            console.log("JSON:", data4[0].item);
+                            // const envelope = result['soap-env:Envelope'];
+                            // const body = envelope['soap-env:Body'];
+                            // const data = body[0];
+                            // const data2 = data['n0:Z_WF_MOBILE_APP_MANAGEResponse'];
+                            // const data3 = data2[0];
+                            // const data4 = data3["ET_RETURN2"];
+                            // responseLast = data4[0].item[0];
+                            responseLast = response.data;
+                            console.log("JSON:", responseLast);
 
                         }
                     });
