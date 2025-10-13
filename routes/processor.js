@@ -24,14 +24,14 @@ router.get('/:processToken', async (req, res) => {
             return res.status(400).send("Geçersiz işlem numarası");
         } else {
             let sServiceUrl = process.env.SAP_BASE_URL + process.env.SAP_SERVICE_URL;
-            if(decoded.sysid === "KED" || decoded.sysid === "KEQ" ){
+            if (decoded.sysid === "KED" || decoded.sysid === "KEQ") {
                 //sServiceUrl= process.env.SAP_BASE_URL + process.env.SAP_SERVICE_URL;
-                sServiceUrl= process.env.SAP_SERVICE_2;
+                sServiceUrl = process.env.SAP_SERVICE_2;
             }
-            else if(decoded.sysid =="KEP" ) {
-                sServiceUrl= process.env.SAP_BASE_URL_PRD + process.env.SAP_SERVICE_URL;
+            else if (decoded.sysid == "KEP") {
+                sServiceUrl = process.env.SAP_BASE_URL_PRD + process.env.SAP_SERVICE_URL;
             }
-            
+
 
             console.log("Service URL:" + sServiceUrl);
             console.log("Token decode edildi")
@@ -41,42 +41,52 @@ router.get('/:processToken', async (req, res) => {
                 password: process.env.SAP_PASSWORD
             };
 
-            console.log("Process auth:" +  process.env.SAP_USERNAME + "@" +  process.env.SAP_PASSWORD);
+            console.log("Process auth:" + process.env.SAP_USERNAME + "@" + process.env.SAP_PASSWORD);
             console.log("Decoded token:", JSON.stringify(decoded));
-            let xml = `<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
-                  xmlns:urn="urn:sap-com:document:sap:rfc:functions">
-                <soapenv:Header/>
-                    <soapenv:Body>
-                        <urn:Z_WF_MOBILE_APP_MANAGE>
-                            <IV_ACTIO>${decoded.actio}</IV_ACTIO>
-                            <IV_APPNO>${decoded.appno}</IV_APPNO>
-                            <IV_DOCID>${decoded.docid}</IV_DOCID>
-                            <IV_PRCID>${decoded.prcid}</IV_PRCID>
-                            <IV_SYSID>${decoded.sysid}</IV_SYSID>
-                            <IV_UNAME>${decoded.uname}</IV_UNAME>
-                            <IV_APPNO2>${decoded.appno2}</IV_APPNO2>
-                        </urn:Z_WF_MOBILE_APP_MANAGE>
-                    </soapenv:Body>
-                </soapenv:Envelope>`
-
-
+            // let xml = `<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
+            //       xmlns:urn="urn:sap-com:document:sap:rfc:functions">
+            //     <soapenv:Header/>
+            //         <soapenv:Body>
+            //             <urn:Z_WF_MOBILE_APP_MANAGE>
+            //                 <IV_ACTIO>${decoded.actio}</IV_ACTIO>
+            //                 <IV_APPNO>${decoded.appno}</IV_APPNO>
+            //                 <IV_DOCID>${decoded.docid}</IV_DOCID>
+            //                 <IV_PRCID>${decoded.prcid}</IV_PRCID>
+            //                 <IV_SYSID>${decoded.sysid}</IV_SYSID>
+            //                 <IV_UNAME>${decoded.uname}</IV_UNAME>
+            //                 <IV_APPNO2>${decoded.appno2}</IV_APPNO2>
+            //             </urn:Z_WF_MOBILE_APP_MANAGE>
+            //         </soapenv:Body>
+            //     </soapenv:Envelope>`
+            
             const token = Buffer.from(`${CONNECTION.user}:${CONNECTION.password}`).toString('base64');
             let config = {
-                method: 'get',
+                //method: 'get',
+                method: 'post',
                 maxBodyLength: Infinity,
                 url: sServiceUrl,
                 headers: {
-                    'Content-Type': 'text/xml',
+                    //'Content-Type': 'text/xml',
+                    'Content-Type': 'application/json',
                     'Authorization': `Basic ${token}`,
                     //'Host': 'onay.kizilayteknoloji.com.tr',
                     //'Cookie': 'sap-usercontext=sap-client=500'
                 },
-                data: xml
+                data: JSON.stringify({
+                IV_ACTIO: decoded.actio,
+                IV_APPNO: decoded.appno,
+                IV_DOCID: decoded.docid,
+                IV_PRCID: decoded.prcid,
+                IV_SYSID: decoded.sysid,
+                IV_UNAME: decoded.uname,
+                IV_APPNO2: decoded.appno2
+            })
+
             };
 
             axios.request(config)
                 .then((response) => {
-                     console.log("SAPDEN istek başarılı döndü")
+                    console.log("SAPDEN istek başarılı döndü")
                     console.log(JSON.stringify(response.data));
                     let responseLast = "";
                     parser.parseString(response.data, (err, result) => {
@@ -89,7 +99,7 @@ router.get('/:processToken', async (req, res) => {
                             const data2 = data['n0:Z_WF_MOBILE_APP_MANAGEResponse'];
                             const data3 = data2[0];
                             const data4 = data3["ET_RETURN2"];
-                            responseLast  = data4[0].item[0]; 
+                            responseLast = data4[0].item[0];
                             console.log("JSON:", data4[0].item);
 
                         }
@@ -100,8 +110,8 @@ router.get('/:processToken', async (req, res) => {
 
                 })
                 .catch((error) => {
-                     console.log("SAP Den cevap hatalı geldi")
-                    console.log("Error:",error);
+                    console.log("SAP Den cevap hatalı geldi")
+                    console.log("Error:", error);
                     return res.status(400).send("<div style='color: #721c24; background-color: #f8d7da; position: relative; padding: .75rem 1.25rem; border: 1px solid #f5c6cb; border-radius: .25rem;'>Onay aşamasında bağlantı başarısız!</div>");
                 });
 
