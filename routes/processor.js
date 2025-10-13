@@ -25,7 +25,8 @@ router.get('/:processToken', async (req, res) => {
         } else {
             let sServiceUrl = process.env.SAP_BASE_URL + process.env.SAP_SERVICE_URL;
             if(decoded.sysid === "KED" || decoded.sysid === "KEQ" ){
-                sServiceUrl= process.env.SAP_BASE_URL + process.env.SAP_SERVICE_URL;
+                //sServiceUrl= process.env.SAP_BASE_URL + process.env.SAP_SERVICE_URL;
+                sServiceUrl= process.env.SAP_SERVICE_2;
             }
             else if(decoded.sysid =="KEP" ) {
                 sServiceUrl= process.env.SAP_BASE_URL_PRD + process.env.SAP_SERVICE_URL;
