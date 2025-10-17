@@ -8,7 +8,7 @@ sap.ui.define([
 
         onInit: function () {
             //this.getRouter().getRoute("process").attachPatternMatched(this._onProcessMatched, this);
-            console.log("Process Controller onInit called");
+            //console.log("Process Controller onInit called");
             
             // Ensure router is available before attaching events
             var oRouter = this.getRouter();
@@ -17,7 +17,7 @@ sap.ui.define([
                 var oRoute = oRouter.getRoute("process");
                 
                 if (oRoute) {
-                    console.log("Attaching pattern matched event to process route");
+                   // console.log("Attaching pattern matched event to process route");
                     oRoute.attachPatternMatched(this._onProcessMatched, this);
                 } else {
                     console.error("Process route not found in router");
@@ -25,7 +25,7 @@ sap.ui.define([
                     setTimeout(function() {
                         var oDelayedRoute = oRouter.getRoute("process");
                         if (oDelayedRoute) {
-                            console.log("Delayed attachment of pattern matched event");
+                            //console.log("Delayed attachment of pattern matched event");
                             oDelayedRoute.attachPatternMatched(this._onProcessMatched, this);
                         }
                     }.bind(this), 500);
@@ -39,19 +39,19 @@ sap.ui.define([
             }
         },
         _attachRouteEvents: function() {
-            console.log("Attempting to attach route events...");
+            //console.log("Attempting to attach route events...");
             var oRouter = this.getRouter();
             
             if (oRouter) {
                 var oRoute = oRouter.getRoute("process");
                 if (oRoute) {
-                    console.log("Successfully attached route events");
+                    //console.log("Successfully attached route events");
                     oRoute.attachPatternMatched(this._onProcessMatched, this);
                 } else {
-                    console.error("Still no process route found");
+                    //console.error("Still no process route found");
                 }
             } else {
-                console.error("Still no router available");
+                //console.error("Still no router available");
             }
         },
         onRefreshPage: function (oEvent) {
@@ -67,7 +67,7 @@ sap.ui.define([
             var sToken = $.sap.getUriParameters().get("token");
             var oAppModel = this.getModel("appModel");
             var that = this;
-            console.log("onProcessMatched giriş")
+            //console.log("onProcessMatched giriş")
             oAppModel.setProperty("/token", sToken);
             oAppModel.setProperty("/message", {
                 "visible": false
@@ -78,11 +78,11 @@ sap.ui.define([
             $.ajax({
                 url: "./api/validator/" + sToken
             }).done(function (encodedToken, textStatus, jqxhr) {
-                console.log("validator bitti")
+                //console.log("validator bitti")
                 that.closeBusyFragment();
                 that._handleProcessEvent(sToken, encodedToken);
             }).error(function (jqxhr, textStatus, errorThrown) {
-                console.log("validator hatası")
+                //console.log("validator hatası")
                 that.closeBusyFragment();
                 oAppModel.setProperty("/message", {
                     "type": "Error",
@@ -123,7 +123,7 @@ sap.ui.define([
                 url: "./api/processor/" + sToken
             }).done(function (data, textStatus, jqxhr) {
                 that.closeBusyFragment();
-                console.log("api/processor başarılı döndü")
+                //console.log("api/processor başarılı döndü")
                 //if (data.TYPE[0] === 'E')
                 if (data.TYPE === 'E')
                     {

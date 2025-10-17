@@ -17,7 +17,7 @@ router.get('/:processToken', async (req, res) => {
         res.status(400).send("Geçersiz işlem numarası");
     }
 
-    console.log("Token:" + sToken);
+    //console.log("Token:" + sToken);
 
     jwt.verify(sToken, process.env.JWT_PRIVATE_KEY, function (err, decoded) {
         if (err) {
@@ -29,20 +29,31 @@ router.get('/:processToken', async (req, res) => {
                 sServiceUrl = process.env.SAP_SERVICE_2;
             }
             else if (decoded.sysid == "KEP") {
-                sServiceUrl = process.env.SAP_BASE_URL_PRD + process.env.SAP_SERVICE_URL;
+                //sServiceUrl = process.env.SAP_BASE_URL_PRD + process.env.SAP_SERVICE_URL;
+                sServiceUrl = process.env.SAP_SERVICE_PRD;
+            }
+
+            //console.log("Service URL:" + sServiceUrl);
+            //console.log("Token decode edildi")
+            let CONNECTION;
+            if (decoded.sysid === "KED" || decoded.sysid === "KEQ") {
+                 CONNECTION = {
+                    url: sServiceUrl,
+                    user: process.env.SAP_USERNAME,
+                    password: process.env.SAP_PASSWORD
+                };
+            }
+            else if (decoded.sysid == "KEP") {
+                 CONNECTION = {
+                    url: sServiceUrl,
+                    user: process.env.SAP_USERNAME,
+                    password: process.env.SAP_PASSWORD_PRD
+                };
             }
 
 
-            console.log("Service URL:" + sServiceUrl);
-            console.log("Token decode edildi")
-            const CONNECTION = {
-                url: sServiceUrl,
-                user: process.env.SAP_USERNAME,
-                password: process.env.SAP_PASSWORD
-            };
-
-            console.log("Process auth:" + process.env.SAP_USERNAME + "@" + process.env.SAP_PASSWORD);
-            console.log("Decoded token:", JSON.stringify(decoded));
+            //console.log("Process auth:" + process.env.SAP_USERNAME + "@" + process.env.SAP_PASSWORD);
+            //console.log("Decoded token:", JSON.stringify(decoded));
             // let xml = `<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
             //       xmlns:urn="urn:sap-com:document:sap:rfc:functions">
             //     <soapenv:Header/>
@@ -86,8 +97,8 @@ router.get('/:processToken', async (req, res) => {
 
             axios.request(config)
                 .then((response) => {
-                    console.log("SAPDEN istek başarılı döndü")
-                    console.log(JSON.stringify(response.data));
+                    //console.log("SAPDEN istek başarılı döndü")
+                    //console.log(JSON.stringify(response.data));
                     const item = response.data.ET_RETURN2?.item;
                     // parser.parseString(response.data, (err, result) => {
                     //     if (err) {
@@ -113,7 +124,7 @@ router.get('/:processToken', async (req, res) => {
                         });
                     }
 
-                    console.log("Response Item:", item);
+                    //console.log("Response Item:", item);
 
                     // Frontend'e JSON olarak gönder
                     return res.status(200).send(item);
@@ -124,7 +135,7 @@ router.get('/:processToken', async (req, res) => {
                 })
                 .catch((error) => {
                     console.log("SAP Den cevap hatalı geldi")
-                    console.log("Error:", error);
+                    // console.log("Error:", error);
                     return res.status(400).send("<div style='color: #721c24; background-color: #f8d7da; position: relative; padding: .75rem 1.25rem; border: 1px solid #f5c6cb; border-radius: .25rem;'>Onay aşamasında bağlantı başarısız!</div>");
                 });
 
